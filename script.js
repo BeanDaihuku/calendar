@@ -134,4 +134,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初回表示
     renderCalendar();
+
+    // Node-REDのURLを設定します
+// [Node-REDのIPアドレス]をあなたの環境に合わせて変更してください
+const nodeRedUrl = 'http://localhost:1880/bath-time';
+
+// 今日の日付を取得し、曜日と日付キーを生成する関数
+const getTodayData = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const dayOfWeek = today.getDay(); // 曜日 (0=日, 1=月, ...)
+    const dateKey = `${year}-${month}-${day}`;
+    return { dateKey, dayOfWeek };
+};
+
+// Node-REDにデータを送信する関数
+const sendDataToNodeRed = () => {
+    const { dateKey, dayOfWeek } = getTodayData();
+    let bathTime = null;
+
+    // 特定の日にキャンセル設定があるかチェック
+    if (cancellations[dateKey]) {
+        // キャンセルされている場合は、何も送信せずに終了
+        console.log(`今日の予定はキャンセルされています: ${dateKey}`);
+        return; 
+    }
+
+    // 曜日ごとの設定から今日の時間を取得
+    if (weeklyBathTimes[dayOfWeek]) {
+        bathTime = weeklyBathTimes[dayOfWeek];
+    }
+
+    if (bathTime) {
+        const data = {
+            date: dateKey,
+            time: bathTime
+        };
+
+        // Node-REDにデータを送信
+        fetch(nodeRedUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Node-REDにデータを送信しました:', data);
+            } else {
+                console.error('Node-REDへのデータ送信に失敗しました:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('通信エラー:', error);
+        });
+    } else {
+        console.log('今日の入浴時間は設定されていません。');
+    }
+};
+
+// ページの読み込みが完了したらデータを送信
+window.onload = sendDataToNodeRed;
 });
