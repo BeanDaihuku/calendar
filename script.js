@@ -11,9 +11,64 @@ h1 {
     color: #333;
 }
 
-.calendar-container {
+.main-container {
+    display: flex;
+    gap: 30px;
     width: 90%;
-    max-width: 800px;
+    max-width: 1200px;
+}
+
+.settings-panel {
+    flex-shrink: 0;
+    width: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: fit-content;
+}
+
+.weekly-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.weekly-item label {
+    font-weight: bold;
+}
+
+.weekly-item input {
+    padding: 5px;
+}
+
+#cancel-section {
+    margin-top: 30px;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    display: none; /* 初期状態では非表示 */
+    flex-direction: column;
+    align-items: center;
+}
+
+#selected-date-info {
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.cancel-button {
+    padding: 8px 15px;
+    background-color: #e57373;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.calendar-container {
+    flex-grow: 1;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -51,7 +106,7 @@ h1 {
 }
 
 .day {
-    aspect-ratio: 1 / 1; /* 正方形にする */
+    aspect-ratio: 1 / 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -66,6 +121,11 @@ h1 {
 
 .day:hover {
     background-color: #e9e9e9;
+}
+
+.day.selected {
+    border: 2px solid #64b5f6;
+    box-shadow: 0 0 5px rgba(100, 181, 246, 0.5);
 }
 
 .day-number {
@@ -88,68 +148,4 @@ h1 {
 
 .prev-month, .next-month {
     color: #aaa;
-}
-
-/* ポップアップのスタイル */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: #fefefe;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-    text-align: center;
-}
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-button:hover {
-    color: black;
-}
-
-.modal-content h3 {
-    margin-top: 0;
-}
-
-.modal-content input {
-    margin: 10px 0;
-    padding: 8px;
-    width: 80%;
-}
-
-.modal-content button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#saveTimeBtn {
-    background-color: #64b5f6;
-    color: white;
-}
-
-#deleteTimeBtn {
-    background-color: #e57373;
-    color: white;
 }
