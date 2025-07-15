@@ -1,78 +1,155 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const calendarGrid = document.getElementById('calendarGrid');
-    const currentMonthEl = document.getElementById('currentMonth');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    let currentDate = new Date();
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    background-color: #f0f2f5;
+}
 
-    const renderCalendar = () => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+h1 {
+    color: #333;
+}
 
-        // 月と年の表示
-        currentMonthEl.textContent = `${year}年 ${month + 1}月`;
+.calendar-container {
+    width: 90%;
+    max-width: 800px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
 
-        // カレンダーグリッドをクリア
-        calendarGrid.innerHTML = '';
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-        // 今月の最初の日と最終日を取得
-        const firstDayOfMonth = new Date(year, month, 1);
-        const lastDayOfMonth = new Date(year, month + 1, 0);
-        
-        const firstDayOfWeek = firstDayOfMonth.getDay(); // 曜日 (0=日, 6=土)
-        const totalDays = lastDayOfMonth.getDate();
+.header button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #555;
+}
 
-        // 前月の余白セルを生成
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            const emptyDay = document.createElement('div');
-            emptyDay.classList.add('day', 'prev-month');
-            calendarGrid.appendChild(emptyDay);
-        }
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    color: #777;
+    margin-bottom: 10px;
+}
 
-        // 今月の日付セルを生成
-        for (let day = 1; day <= totalDays; day++) {
-            const dayEl = document.createElement('div');
-            dayEl.classList.add('day');
-            dayEl.innerHTML = `<span class="day-number">${day}</span>`;
-            dayEl.dataset.date = `${year}-${month + 1}-${day}`;
-            
-            // クリックイベントを追加
-            dayEl.addEventListener('click', () => {
-                addBathTime(dayEl);
-            });
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
 
-            calendarGrid.appendChild(dayEl);
-        }
-    };
+.day {
+    aspect-ratio: 1 / 1; /* 正方形にする */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    user-select: none;
+}
 
-    const addBathTime = (dayElement) => {
-        // すでに予定があるかチェック
-        if (dayElement.querySelector('.bath-time')) {
-            // 予定を削除
-            dayElement.querySelector('.bath-time').remove();
-        } else {
-            // 予定を追加
-            const bathTimeEl = document.createElement('div');
-            bathTimeEl.classList.add('bath-time');
-            // ここでは時間を固定値で表示
-            bathTimeEl.textContent = 'お風呂'; 
-            dayElement.appendChild(bathTimeEl);
-        }
-    };
+.day:hover {
+    background-color: #e9e9e9;
+}
 
-    // 前月へ
-    prevBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-    });
+.day-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
 
-    // 次月へ
-    nextBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
+.bath-time {
+    background-color: #64b5f6;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+}
 
-    // 初回表示
-    renderCalendar();
-});
+.prev-month, .next-month {
+    color: #aaa;
+}
+
+/* ポップアップのスタイル */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: black;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+}
+
+.modal-content input {
+    margin: 10px 0;
+    padding: 8px;
+    width: 80%;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#saveTimeBtn {
+    background-color: #64b5f6;
+    color: white;
+}
+
+#deleteTimeBtn {
+    background-color: #e57373;
+    color: white;
+}
