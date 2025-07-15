@@ -25,6 +25,18 @@
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
+
+    <div id="timeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalDate"></h3>
+            <label for="bathTime">お風呂に入る時間:</label>
+            <input type="time" id="bathTime" value="19:00">
+            <button id="saveTimeBtn">保存</button>
+            <button id="deleteTimeBtn" class="delete-button">削除</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
