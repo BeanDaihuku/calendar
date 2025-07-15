@@ -4,24 +4,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     
-    // ポップアップ関連の要素
-    const timeModal = document.getElementById('timeModal');
-    const modalDateEl = document.getElementById('modalDate');
-    const bathTimeInput = document.getElementById('bathTime');
-    const saveTimeBtn = document.getElementById('saveTimeBtn');
-    const deleteTimeBtn = document.getElementById('deleteTimeBtn');
-    const closeButton = document.querySelector('.close-button');
+    // 設定パネル関連の要素
+    const weeklyInputs = document.querySelectorAll('#weeklySettings input[type="time"]');
+    const cancelSection = document.getElementById('cancel-section');
+    const selectedDateInfo = document.getElementById('selected-date-info');
+    const cancelBtn = document.getElementById('cancelBtn');
 
     let currentDate = new Date();
-    let selectedDayEl = null;
+    
+    // 曜日ごとの時間設定を保存するオブジェクト（曜日番号:時間）
+    const weeklyBathTimes = {
+        0: '20:00', // 日
+        1: '19:00', // 月
+        2: '19:00', // 火
+        3: '19:00', // 水
+        4: '19:00', // 木
+        5: '19:00', // 金
+        6: '20:00'  // 土
+    };
 
-    // 予定を保存するためのオブジェクト
-    const bathTimes = {};
+    // 特定の日をキャンセルするためのオブジェクト
+    const cancellations = {};
 
     const renderCalendar = () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
-
+        
         currentMonthEl.textContent = `${year}年 ${month + 1}月`;
         calendarGrid.innerHTML = '';
 
@@ -31,97 +39,99 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstDayOfWeek = firstDayOfMonth.getDay();
         const totalDays = lastDayOfMonth.getDate();
 
+        // 前月の余白セルを生成
         for (let i = 0; i < firstDayOfWeek; i++) {
             const emptyDay = document.createElement('div');
             emptyDay.classList.add('day', 'prev-month');
             calendarGrid.appendChild(emptyDay);
         }
 
+        // 今月の日付セルを生成
         for (let day = 1; day <= totalDays; day++) {
             const dayEl = document.createElement('div');
             dayEl.classList.add('day');
             dayEl.innerHTML = `<span class="day-number">${day}</span>`;
-            dayEl.dataset.date = `${year}-${month + 1}-${day}`;
             
-            // 予定がある場合は表示
-            const dateKey = dayEl.dataset.date;
-            if (bathTimes[dateKey]) {
+            const date = new Date(year, month, day);
+            const dayOfWeek = date.getDay(); // 曜日を取得
+            const dateKey = `${year}-${month + 1}-${day}`;
+            dayEl.dataset.date = dateKey;
+            dayEl.dataset.dayOfWeek = dayOfWeek;
+            
+            // 予定の表示ロジック
+            if (cancellations[dateKey]) {
+                // キャンセルされた日は表示しない
+            } else if (weeklyBathTimes[dayOfWeek]) {
                 const bathTimeEl = document.createElement('div');
                 bathTimeEl.classList.add('bath-time');
-                bathTimeEl.textContent = bathTimes[dateKey];
+                bathTimeEl.textContent = weeklyBathTimes[dayOfWeek];
                 dayEl.appendChild(bathTimeEl);
             }
 
             dayEl.addEventListener('click', () => {
-                openTimeModal(dayEl);
+                selectDay(dayEl);
             });
 
             calendarGrid.appendChild(dayEl);
         }
     };
-
-    const openTimeModal = (dayElement) => {
-        selectedDayEl = dayElement;
+    
+    const selectDay = (dayElement) => {
+        // 選択状態の解除
+        document.querySelectorAll('.day').forEach(el => el.classList.remove('selected'));
+        // 選択状態の追加
+        dayElement.classList.add('selected');
+        
         const dateKey = dayElement.dataset.date;
-        modalDateEl.textContent = `${dateKey}`;
+        selectedDateInfo.textContent = `${dateKey}の予定`;
         
-        // 既存の予定があれば、時間を入力欄にセット
-        if (bathTimes[dateKey]) {
-            bathTimeInput.value = bathTimes[dateKey];
-            deleteTimeBtn.style.display = 'block';
+        // 特定日のキャンセルボタンを表示
+        cancelSection.style.display = 'flex';
+        
+        // ボタンのイベントを再定義
+        cancelBtn.onclick = () => {
+            if (cancellations[dateKey]) {
+                // すでにキャンセル済みなら、キャンセルを解除
+                delete cancellations[dateKey];
+            } else {
+                // キャンセル
+                cancellations[dateKey] = true;
+            }
+            renderCalendar();
+            cancelSection.style.display = 'none'; // 非表示に戻す
+        };
+        
+        // ボタンのテキストを切り替える
+        if (cancellations[dateKey]) {
+            cancelBtn.textContent = '予定を元に戻す';
+            cancelBtn.classList.add('restore-button');
         } else {
-            bathTimeInput.value = '19:00'; // デフォルト値
-            deleteTimeBtn.style.display = 'none';
+            cancelBtn.textContent = 'この日の予定をキャンセル';
+            cancelBtn.classList.remove('restore-button');
         }
-        
-        timeModal.style.display = 'flex';
     };
 
-    const closeTimeModal = () => {
-        timeModal.style.display = 'none';
-    };
-
-    // 保存ボタンのイベント
-    saveTimeBtn.addEventListener('click', () => {
-        const dateKey = selectedDayEl.dataset.date;
-        const time = bathTimeInput.value;
-        
-        if (time) {
-            bathTimes[dateKey] = time;
-        } else {
-            delete bathTimes[dateKey];
-        }
-        
-        renderCalendar();
-        closeTimeModal();
+    // 曜日ごとの設定が変更されたらカレンダーを再描画
+    weeklyInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            const dayOfWeek = e.target.dataset.day;
+            weeklyBathTimes[dayOfWeek] = e.target.value;
+            renderCalendar();
+        });
     });
 
-    // 削除ボタンのイベント
-    deleteTimeBtn.addEventListener('click', () => {
-        const dateKey = selectedDayEl.dataset.date;
-        delete bathTimes[dateKey];
-        
-        renderCalendar();
-        closeTimeModal();
-    });
-
-    // 閉じるボタンとモーダル外のクリックで閉じる
-    closeButton.addEventListener('click', closeTimeModal);
-    window.addEventListener('click', (event) => {
-        if (event.target === timeModal) {
-            closeTimeModal();
-        }
-    });
-
+    // 前月へ
     prevBtn.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
     });
 
+    // 次月へ
     nextBtn.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
     });
 
+    // 初回表示
     renderCalendar();
 });
