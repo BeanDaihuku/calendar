@@ -1,137 +1,151 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const calendarGrid = document.getElementById('calendarGrid');
-    const currentMonthEl = document.getElementById('currentMonth');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    // 設定パネル関連の要素
-    const weeklyInputs = document.querySelectorAll('#weeklySettings input[type="time"]');
-    const cancelSection = document.getElementById('cancel-section');
-    const selectedDateInfo = document.getElementById('selected-date-info');
-    const cancelBtn = document.getElementById('cancelBtn');
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    background-color: #f0f2f5;
+}
 
-    let currentDate = new Date();
-    
-    // 曜日ごとの時間設定を保存するオブジェクト（曜日番号:時間）
-    const weeklyBathTimes = {
-        0: '20:00', // 日
-        1: '19:00', // 月
-        2: '19:00', // 火
-        3: '19:00', // 水
-        4: '19:00', // 木
-        5: '19:00', // 金
-        6: '20:00'  // 土
-    };
+h1 {
+    color: #333;
+}
 
-    // 特定の日をキャンセルするためのオブジェクト
-    const cancellations = {};
+.main-container {
+    display: flex;
+    gap: 30px;
+    width: 90%;
+    max-width: 1200px;
+}
 
-    const renderCalendar = () => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
-        currentMonthEl.textContent = `${year}年 ${month + 1}月`;
-        calendarGrid.innerHTML = '';
+.settings-panel {
+    flex-shrink: 0;
+    width: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: fit-content;
+}
 
-        const firstDayOfMonth = new Date(year, month, 1);
-        const lastDayOfMonth = new Date(year, month + 1, 0);
-        
-        const firstDayOfWeek = firstDayOfMonth.getDay();
-        const totalDays = lastDayOfMonth.getDate();
+.weekly-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
 
-        // 前月の余白セルを生成
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            const emptyDay = document.createElement('div');
-            emptyDay.classList.add('day', 'prev-month');
-            calendarGrid.appendChild(emptyDay);
-        }
+.weekly-item label {
+    font-weight: bold;
+}
 
-        // 今月の日付セルを生成
-        for (let day = 1; day <= totalDays; day++) {
-            const dayEl = document.createElement('div');
-            dayEl.classList.add('day');
-            dayEl.innerHTML = `<span class="day-number">${day}</span>`;
-            
-            const date = new Date(year, month, day);
-            const dayOfWeek = date.getDay(); // 曜日を取得
-            const dateKey = `${year}-${month + 1}-${day}`;
-            dayEl.dataset.date = dateKey;
-            dayEl.dataset.dayOfWeek = dayOfWeek;
-            
-            // 予定の表示ロジック
-            if (cancellations[dateKey]) {
-                // キャンセルされた日は表示しない
-            } else if (weeklyBathTimes[dayOfWeek]) {
-                const bathTimeEl = document.createElement('div');
-                bathTimeEl.classList.add('bath-time');
-                bathTimeEl.textContent = weeklyBathTimes[dayOfWeek];
-                dayEl.appendChild(bathTimeEl);
-            }
+.weekly-item input {
+    padding: 5px;
+}
 
-            dayEl.addEventListener('click', () => {
-                selectDay(dayEl);
-            });
+#cancel-section {
+    margin-top: 30px;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    display: none; /* 初期状態では非表示 */
+    flex-direction: column;
+    align-items: center;
+}
 
-            calendarGrid.appendChild(dayEl);
-        }
-    };
-    
-    const selectDay = (dayElement) => {
-        // 選択状態の解除
-        document.querySelectorAll('.day').forEach(el => el.classList.remove('selected'));
-        // 選択状態の追加
-        dayElement.classList.add('selected');
-        
-        const dateKey = dayElement.dataset.date;
-        selectedDateInfo.textContent = `${dateKey}の予定`;
-        
-        // 特定日のキャンセルボタンを表示
-        cancelSection.style.display = 'flex';
-        
-        // ボタンのイベントを再定義
-        cancelBtn.onclick = () => {
-            if (cancellations[dateKey]) {
-                // すでにキャンセル済みなら、キャンセルを解除
-                delete cancellations[dateKey];
-            } else {
-                // キャンセル
-                cancellations[dateKey] = true;
-            }
-            renderCalendar();
-            cancelSection.style.display = 'none'; // 非表示に戻す
-        };
-        
-        // ボタンのテキストを切り替える
-        if (cancellations[dateKey]) {
-            cancelBtn.textContent = '予定を元に戻す';
-            cancelBtn.classList.add('restore-button');
-        } else {
-            cancelBtn.textContent = 'この日の予定をキャンセル';
-            cancelBtn.classList.remove('restore-button');
-        }
-    };
+#selected-date-info {
+    font-size: 1.1rem;
+    color: #555;
+}
 
-    // 曜日ごとの設定が変更されたらカレンダーを再描画
-    weeklyInputs.forEach(input => {
-        input.addEventListener('change', (e) => {
-            const dayOfWeek = e.target.dataset.day;
-            weeklyBathTimes[dayOfWeek] = e.target.value;
-            renderCalendar();
-        });
-    });
+.cancel-button {
+    padding: 8px 15px;
+    background-color: #e57373;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
 
-    // 前月へ
-    prevBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-    });
+.calendar-container {
+    flex-grow: 1;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
 
-    // 次月へ
-    nextBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-    // 初回表示
-    renderCalendar();
-});
+.header button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #555;
+}
+
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.day {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    user-select: none;
+}
+
+.day:hover {
+    background-color: #e9e9e9;
+}
+
+.day.selected {
+    border: 2px solid #64b5f6;
+    box-shadow: 0 0 5px rgba(100, 181, 246, 0.5);
+}
+
+.day-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.bath-time {
+    background-color: #64b5f6;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+}
+
+.prev-month, .next-month {
+    color: #aaa;
+}
