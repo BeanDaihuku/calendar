@@ -162,11 +162,11 @@ h1 {
 
     .settings-panel {
         width: auto; /* 幅を自動調整 */
-        order: 2; /* **時間設定パネルをカレンダーの下に配置** */
+        order: 2; /* カレンダーの下に配置 */
     }
 
     .calendar-container {
-        order: 1; /* **カレンダーを時間設定パネルの上に配置** */
+        order: 1; /* カレンダーを上に配置 */
         width: auto; /* 幅を自動調整 */
     }
 
