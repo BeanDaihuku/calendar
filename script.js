@@ -198,4 +198,39 @@ const sendDataToNodeRed = () => {
 
 // ページの読み込みが完了したらデータを送信
 window.onload = sendDataToNodeRed;
+
+// ... 既存のコード ...
+
+// CSV書き出しボタンを追加する例 (index.htmlにもボタン要素を追加する必要があります)
+const exportCsvBtn = document.getElementById('exportCsvBtn'); // 仮にexportCsvBtnというIDのボタンがあるとします
+
+if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "日付,時刻,キャンセル\n"; // ヘッダー行
+
+        // 週ごとの設定を基にしたデータ
+        for (const dayOfWeek in weeklyBathTimes) {
+            const time = weeklyBathTimes[dayOfWeek];
+            const dayName = ["日", "月", "火", "水", "木", "金", "土"][dayOfWeek];
+            csvContent += `${dayName},${time},\n`; // 週ごとの設定はキャンセルなし
+        }
+
+        // 特定日のキャンセル情報を追加
+        for (const dateKey in cancellations) {
+            if (cancellations[dateKey]) {
+                csvContent += `${dateKey},,キャンセル\n`; // 日付とキャンセル情報
+            }
+        }
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "bath_time_schedule.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
+
 });
