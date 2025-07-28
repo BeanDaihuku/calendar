@@ -1,37 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>Nest Mini アナウンス設定</title>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        input[type="time"] { padding: 8px; font-size: 16px; }
-        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お風呂タイムカレンダー</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Nest Mini アナウンス設定</h1>
-    <form action="http://localhost:1880/set-announcement" method="post">
-        <label for="announcementTime">アナウンス時間:</label>
-        <input type="time" id="announcementTime" name="announcementTime" required>
-        <br><br>
-        <label for="announcementText">アナウンス内容:</label>
-        <input type="text" id="announcementText" name="announcementText" value="時間になりました。" size="50">
-        <br><br>
-        <button type="submit">設定</button>
-    </form>
-    <div id="message"></div>
-    <script>
-        // オプション: 設定後のメッセージ表示
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            if (status === 'success') {
-                document.getElementById('message').innerText = 'アナウンスが設定されました！';
-            } else if (status === 'error') {
-                document.getElementById('message').innerText = 'エラーが発生しました。時間を正しく入力してください。';
-            }
-        };
-    </script>
+    <h1>お風呂タイムカレンダー</h1>
+    
+    <div class="main-container">
+        <div class="settings-panel">
+            <h2>曜日ごとの設定</h2>
+            <div id="weeklySettings">
+                <div class="weekly-item">
+                    <label>月曜日:</label>
+                    <input type="time" data-day="1" value="19:00">
+                </div>
+                <div class="weekly-item">
+                    <label>火曜日:</label>
+                    <input type="time" data-day="2" value="19:00">
+                </div>
+                <div class="weekly-item">
+                    <label>水曜日:</label>
+                    <input type="time" data-day="3" value="19:00">
+                </div>
+                <div class="weekly-item">
+                    <label>木曜日:</label>
+                    <input type="time" data-day="4" value="19:00">
+                </div>
+                <div class="weekly-item">
+                    <label>金曜日:</label>
+                    <input type="time" data-day="5" value="19:00">
+                </div>
+                <div class="weekly-item">
+                    <label>土曜日:</label>
+                    <input type="time" data-day="6" value="20:00">
+                </div>
+                <div class="weekly-item">
+                    <label>日曜日:</label>
+                    <input type="time" data-day="0" value="20:00">
+                </div>
+            </div>
+            
+            <div id="cancel-section">
+                <h3 id="selected-date-info"></h3>
+                <button id="cancelBtn" class="cancel-button">この日の予定をキャンセル</button>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="header">
+                <button id="prevBtn">&lt;</button>
+                <h2 id="currentMonth"></h2>
+                <button id="nextBtn">&gt;</button>
+            </div>
+            <div class="weekdays">
+                <div>日</div>
+                <div>月</div>
+                <div>火</div>
+                <div>水</div>
+                <div>木</div>
+                <div>金</div>
+                <div>土</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
